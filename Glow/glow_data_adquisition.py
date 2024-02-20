@@ -40,7 +40,7 @@ def graficar_barrido(j = 1, xscale = 'linear'):
     voltajes, v1, v2 = np.loadtxt('barrido_voltajes_{}.txt'.format(j), delimiter=',', unpack=True, skiprows = 1)
 
     v_ac = v1*1023.1 - v2   # [V]
-    I = v2/14.86*1e-3 *1e-3 # [mA]
+    I = v2/14.86 # [mA]
     n = len(I)//2
 
     plt.figure(j)
@@ -98,12 +98,12 @@ def graficar_vruptura(j = 1, xscale = 'linear'):
     voltajes, v1, v2 = np.loadtxt('paschen_{}.txt'.format(j), delimiter=',', unpack=True, skiprows = 1)
 
     v_ac = v1*1023.1 - v2   # [V]
-    I = v2/14.86*1e-3 *1e-3 # [mA]
+    I = v2/14.86 # [mA]
 
     V_I = np.zeros((len(v_ac),2))
     V_I[:,0] = v_ac
     V_I[:,1] = I
-    vc = max(filter(lambda a: a[1] <= 1e-9, V_I), key=itemgetter(0))
+    vc = max(filter(lambda a: a[1] <= 1e-3, V_I), key=itemgetter(0))
 
     plt.figure(j)
     plt.title('Curva V vs I',fontsize=14)
@@ -160,12 +160,12 @@ def vruptura(j = 1, n_a = 15, n_b = 40, vi = 200, vf = 900, fc = 500, ts = 1, xs
             print('j = ', i)
             
             v_ac = v1[i]*1023.1 - v2[i]
-            I_i = v2[i]/14.86*1e-3 *1e-3
+            I_i = v2[i]/14.86
             print('vac = ', v_ac, 'V')
             print('i = ', I_i, 'mA')
             print('vfuente = ', v1[i]*1023.1, 'V')
             print(' ')
-            if I_i > 1e-9:
+            if I_i > 1e-3:
                 if R == 0:
                     voltajes = np.hstack((np.linspace(voltajes[i-4],voltajes[i-2],5),
                                           np.linspace(voltajes[i-2],voltajes[i+1],n_b)))
@@ -204,7 +204,7 @@ for l in range(1,22):
     d = float(h[3]) # cm
         
     v_ac = v1*1023.1 - v2
-    I = v2/14.86*1e-3 *1e-3
+    I = v2/14.86
 
     V_I = np.zeros((len(v_ac),2))
     V_I[:,0] = v_ac
@@ -212,7 +212,7 @@ for l in range(1,22):
     print(f'j={l}')
     if all(I <= 1e-10) or all(I >= 1e-10): # Para que saltee los casos en los que no llego a saturar
         continue
-    vc = max(filter(lambda a: a[1] <= 1e-9, V_I), key=itemgetter(0))
+    vc = max(filter(lambda a: a[1] <= 1e-3, V_I), key=itemgetter(0))
     print(vc)
     v_ruptura.append([vc[0]])
     
