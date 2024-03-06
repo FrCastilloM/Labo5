@@ -190,11 +190,24 @@ tau_criterio = picos separados temporalmente por debajo de este valor se cuentan
 
 alpha = angulo relativo a la fuente del centellador desplazable (este valor se anota en el header
 de los .txt con los datos)
-                                                                 
+                                                          
+fotopico_volt = [[min_ai1, max_ai1], [min_ai2, max_ai2]]
+Si la amplitud en voltaje de un pico detectado en el canal ai1(2) esta dentro del rango establecido
+por este parametro, entonces es candidato a ser considerado como una coincidencia. De lo contrario,
+si el pico cae por fuera de este rango, es descartado.
+Estos rangos deben estar centrados en los fotopicos medidos para cada canal correspondientes a la emision
+de 0.511 MeV del 22Na.   
 
 '''
 
-def coincidencias(name, dt, cant_ventanas, tau_criterio, alpha, task, HV = ['None', 'None'],
+def criterio_temporal(picoai1, picoai2, fs, tau_criterio):
+    return abs((picoai1 - picoai2)/fs) < tau_criterio
+
+def criterio_voltaje(picoai1_v, picoai2_v, umbrales):
+    return umbrales[0][0] <= picoai1_v <= umbrales[0][1] and umbrales[1][0]  <= picoai2_v <= umbrales[1][1] 
+
+
+def coincidencias(name, dt, cant_ventanas, tau_criterio, alpha, fotopico_volt, task, HV = ['None', 'None'],
                   save = 'False', fs = 2e5, umbral = [[0.05,9.5], [0.05,9.5]] , distance = [10, 10],
                    sign = [-1, 1], remplace = 'False', num_canales = 2):
 
@@ -254,7 +267,10 @@ def coincidencias(name, dt, cant_ventanas, tau_criterio, alpha, task, HV = ['Non
         
         for v in range(len(picos_temp[0])):
             for mu in range(len(picos_temp[1])):
-                if abs((picos_temp[0][v] - picos_temp[1][mu])/fs) < tau_criterio:
+                ct = criterio_temporal(picos_temp[0][v], picos_temp[1][mu], fs, tau_criterio)
+                cv = criterio_voltaje(y[0,:][picos_temp[0][v]], y[1,:][picos_temp[1][mu]], fotopico_volt)
+   
+                if ct and cv:
                     coincidences_index[0].extend([picos_temp[0][v]])
                     coincidences_index[1].extend([picos_temp[1][mu]])
                     
@@ -417,11 +433,14 @@ dt = 5 # dwell time/duracion
 n = 100 # cantidad de ventanas 
 umbral = [[.05, 9.5], [.05, 9.5]] # umbrales de deteccion de picos
 
+# regiones de las campanas definidas por los fotopicos de 0.511 MeV 
+fotopico_volt = [[0.86, 1.5], [1.8, 2.8]] 
+
 name = '22Na_coincidencias'
 
 (picos, tiempos, dist, eventos_por_ventana, coin_picos, coin_tiempos, 
     coin_dist, coincidencias_por_ventana) = coincidencias(name, dt, n, tau_criterio, 
-                                                          alpha, task, HV = HV,
+                                                          alpha, fotopico_volt, task, HV = HV,
                                                           save = 'False', umbral = umbral)
 
                                                           
