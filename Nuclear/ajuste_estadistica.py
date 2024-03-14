@@ -196,7 +196,7 @@ def graph_hist(name, dt, K, ajuste = 'Poisson', labels = ['Datos', 'Poisson'], c
     
     return N
 
-#%% Ajustes poisson 207Bi y polya fondo
+#%% Ajustes fondo
 
 dt = .05
 K = 20 # numero de repeticiones del "histograma" (sobre lo cual se promedia) 
